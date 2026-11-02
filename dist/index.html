@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Read-only FactoryPulse operational dashboard demonstration.">
+  <title>FactoryPulse · Operations Dashboard</title>
+  <style>
+    :root { --bg:#07111d; --panel:#0e1b2d; --border:#223858; --text:#edf5ff; --muted:#9cb1ca; --cyan:#4dd5f2; --green:#62e6b5; --amber:#f8c66d; --red:#ff7b87; font-family:Inter, ui-sans-serif,system-ui,sans-serif; color:var(--text); background:var(--bg); }
+    *{box-sizing:border-box} body{margin:0;background:radial-gradient(800px 500px at 90% -10%,#133758 0%,transparent 60%),var(--bg)}
+    main{max-width:1180px;margin:auto;padding:36px 22px 60px}.eyebrow{color:var(--cyan);text-transform:uppercase;letter-spacing:.13em;font-size:.75rem;font-weight:800}.head{display:flex;align-items:start;justify-content:space-between;gap:18px;margin-bottom:28px}h1{margin:6px 0;font-size:clamp(2rem,5vw,3.5rem);letter-spacing:-.05em}.subtitle,.muted{color:var(--muted)}.badge{border:1px solid #366d78;color:var(--green);background:#0e2c32;padding:7px 10px;border-radius:999px;font-size:.82rem;white-space:nowrap}.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.card{background:linear-gradient(145deg,#10223a,#0c182a);border:1px solid var(--border);border-radius:16px;padding:18px}.label{font-size:.78rem;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}.value{font-weight:800;font-size:2rem;margin:8px 0 4px}.good{color:var(--green)}.alert{color:var(--red)}.layout{display:grid;grid-template-columns:1.3fr .9fr;gap:14px;margin-top:14px}h2{font-size:1.1rem;margin:0 0 16px}.table{width:100%;border-collapse:collapse}.table th,.table td{text-align:left;padding:11px 6px;border-bottom:1px solid #203653;font-size:.9rem}.table th{color:var(--muted);font-weight:600}.severity{color:var(--red);font-weight:800;text-transform:uppercase;font-size:.74rem}.reason{color:var(--muted);line-height:1.45;font-size:.86rem}.foot{margin-top:22px;padding:14px;border-left:3px solid var(--amber);color:var(--muted);background:#201a11;border-radius:5px}.source{font-size:.8rem;color:var(--muted);margin-top:5px}@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.layout{grid-template-columns:1fr}.head{display:block}.badge{display:inline-block;margin-top:10px}}@media(max-width:460px){.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <main>
+    <header class="head"><div><div class="eyebrow">FactoryPulse · Read-only operations</div><h1>Plant overview</h1><p class="subtitle">A traceable view of validated telemetry, pipeline quality and explainable anomalies.</p></div><div class="badge" id="mode">Loading data…</div></header>
+    <section class="grid" aria-label="Operational indicators">
+      <article class="card"><div class="label">Assets reporting</div><div class="value good" id="assets">—</div><div class="source">From lakehouse gold layer</div></article>
+      <article class="card"><div class="label">Validated readings</div><div class="value" id="readings">—</div><div class="source">Current pipeline run</div></article>
+      <article class="card"><div class="label">Anomalies</div><div class="value alert" id="anomalies">—</div><div class="source">Validated intelligence events</div></article>
+      <article class="card"><div class="label">Rejected data</div><div class="value" id="rejected">—</div><div class="source">Quarantined before analysis</div></article>
+    </section>
+    <section class="layout"><article class="card"><h2>Asset health</h2><table class="table"><thead><tr><th>Asset</th><th>Readings</th><th>Temperature</th><th>Vibration</th><th>Critical signals</th></tr></thead><tbody id="health"></tbody></table></article><article class="card"><h2>Data lineage</h2><p class="muted">The dashboard consumes outputs from a contract-validated pipeline.</p><ol class="reason"><li>Ingestion produces <code>telemetry.v1</code>.</li><li>Lakehouse validates and materialises silver/gold layers.</li><li>Intelligence publishes <code>anomaly.v1</code>.</li><li>This dashboard remains read-only.</li></ol></article></section>
+    <section class="card" style="margin-top:14px"><h2>Explainable anomaly feed</h2><div id="feed"></div></section>
+    <p class="foot">This is a demonstrator for observability and review. It does not control equipment, acknowledge alarms or replace safety systems. <span id="time"></span></p>
+  </main>
+  <script>
+    async function load(){const parameter=new URLSearchParams(location.search).get('api');const base=parameter?parameter.replace(/\/$/,''):'';let summary,events,mode;try{if(base){[summary,events]=await Promise.all([fetch(base+'/v1/summary').then(r=>r.json()),fetch(base+'/v1/anomalies').then(r=>r.json())]);mode='Live API';}else{summary=await fetch('./data/demo.json').then(r=>r.json());events=summary.anomalies;mode='Demo snapshot';}}catch(error){document.getElementById('mode').textContent='Data unavailable';return}document.getElementById('mode').textContent=mode;const health=summary.asset_health||[];const quality=summary.data_quality||{};document.getElementById('assets').textContent=new Set(health.map(x=>x.asset_id)).size;document.getElementById('readings').textContent=quality.accepted_rows??'—';document.getElementById('anomalies').textContent=summary.anomaly_count??events.events.length;document.getElementById('rejected').textContent=quality.rejected_rows??'—';document.getElementById('health').innerHTML=health.map(x=>`<tr><td>${x.asset_id}</td><td>${x.readings}</td><td>${x.avg_temperature_c} °C</td><td>${x.avg_vibration_mm_s} mm/s</td><td class="${x.critical_signal_count?'alert':'good'}">${x.critical_signal_count}</td></tr>`).join('')||'<tr><td colspan="5">No asset health data.</td></tr>';document.getElementById('feed').innerHTML=(events.events||[]).map(x=>`<article style="padding:12px 0;border-bottom:1px solid #203653"><span class="severity">${x.severity}</span> · <strong>${x.asset_id}</strong> · score ${x.score}<div class="reason">${x.reasons.join(' · ')}</div></article>`).join('')||'<p class="muted">No anomaly events.</p>';document.getElementById('time').textContent=quality.occurred_at?`Pipeline event: ${quality.occurred_at}.`:'';}load();
+  </script>
+</body>
+</html>

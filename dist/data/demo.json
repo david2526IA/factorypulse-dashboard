@@ -1,0 +1,10 @@
+{
+  "asset_health": [{"hour":"2026-01-01T00:00:00Z","asset_id":"PUMP-01","readings":12,"avg_temperature_c":71.0,"avg_vibration_mm_s":5.8,"avg_pressure_bar":6.7,"avg_power_kw":19.9,"critical_signal_count":4}],
+  "anomaly_count": 4,
+  "invalid_anomaly_records": 0,
+  "data_quality": {"event_type":"factorypulse.data_quality","pipeline":"factorypulse-lakehouse","accepted_rows":12,"rejected_rows":0,"occurred_at":"2026-11-02T12:50:04Z"},
+  "anomalies": {"events": [
+    {"occurred_at":"2026-01-01T00:02:00Z","asset_id":"PUMP-01","severity":"critical","score":31.213,"reasons":["temperature_c robust-z=27.26","vibration critical (12.1 mm/s)"]},
+    {"occurred_at":"2026-01-01T00:02:15Z","asset_id":"PUMP-01","severity":"critical","score":31.425,"reasons":["temperature_c robust-z=28.01","vibration critical (12.2 mm/s)"]}
+  ]}
+}
