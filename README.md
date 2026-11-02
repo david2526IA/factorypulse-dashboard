@@ -1,34 +1,36 @@
 # FactoryPulse Dashboard
 
-> Read-only operational dashboard for the FactoryPulse reference platform.
+> Panel de operaciones de solo lectura para la plataforma de referencia FactoryPulse.
 
-The dashboard visualises validated asset health, pipeline quality and explainable anomaly events from the FactoryPulse API. It ships with a static demo snapshot so it can be reviewed without infrastructure, and it can connect to a deployed API with `?api=https://your-api.example`.
+<p align="center"><img src="docs/lectura.svg" alt="El dashboard consulta la API sin enviar órdenes" width="100%"></p>
 
-## What it demonstrates
+El dashboard muestra salud de activos, calidad del pipeline y anomalías explicables desde la API de FactoryPulse. Incluye una instantánea estática para revisar la interfaz sin infraestructura y puede conectarse a una API desplegada mediante `?api=https://tu-api.example`.
 
-- Responsive, accessible operations UI with a deliberately read-only boundary.
-- Clear data lineage from ingestion to lakehouse, intelligence and API.
-- Explainable anomaly feed — reasons and scores instead of opaque alert labels.
-- Static deployment with no API key, account or hidden back end.
+## Qué enseña
 
-## Run locally
+- Interfaz responsive para operaciones con un límite deliberado de solo lectura.
+- Linaje de datos visible: ingesta → lakehouse → inteligencia → API → panel.
+- Anomalías con motivo y puntuación, en lugar de alertas opacas.
+- Despliegue estático sin claves API, cuentas ni backend oculto.
 
-Serve `dist/` with any static server, for example:
+## Demo local reproducible
 
 ```bash
 python -m http.server 8080 --directory dist
 ```
 
-Open `http://127.0.0.1:8080`. To use a real FactoryPulse API, open:
+Abre `http://127.0.0.1:8080`. Para conectar una API compatible de FactoryPulse:
 
 ```text
 http://127.0.0.1:8080/?api=http://127.0.0.1:8000
 ```
 
-## Safety boundary
+La versión publicada usa la instantánea de demostración incluida. Una API real requiere, antes de exponerla, autenticación, política CORS, control de acceso y revisión operativa.
 
-This dashboard never issues commands to equipment and must not be used as a safety or control system. It is an observability and review interface for a simulated reference platform.
+## Límite de seguridad
 
-## Deployment
+Este panel no emite comandos a equipos ni es un sistema de control o de seguridad. Es una interfaz de observabilidad y revisión para una plataforma simulada de referencia.
 
-The repository is configured as a static Sites project. The published version uses the included demo snapshot; connect a production API only after adding authentication, CORS policy, access control and operational review.
+## English summary
+
+Read-only operations dashboard for the FactoryPulse reference platform. It visualises validated asset health, pipeline quality and explainable anomalies. The included static demo can be reviewed without infrastructure; a real API needs authentication and operational controls.
