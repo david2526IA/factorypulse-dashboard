@@ -1,0 +1,14 @@
+name: Dashboard CI
+on: [push, pull_request]
+permissions: {contents: read}
+jobs:
+  validate-static-site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate dashboard files
+        run: |
+          test -f dist/index.html
+          test -f dist/data/demo.json
+          python -m json.tool dist/data/demo.json > /dev/null
+          grep -q "FactoryPulse" dist/index.html
